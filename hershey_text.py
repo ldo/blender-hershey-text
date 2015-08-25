@@ -74,6 +74,12 @@ class HersheyText(bpy.types.Operator) :
         description = "name of Hershey font to use",
         items = list_hershey_fonts(),
       )
+    delete_text = bpy.props.BoolProperty \
+      (
+        name = "Delete Original Text",
+        description = "delete the original text object",
+        default = False
+      )
 
     @classmethod
     def poll(celf, context) :
@@ -94,6 +100,7 @@ class HersheyText(bpy.types.Operator) :
         the_col = self.layout.column(align = True)
         the_col.label("Hershey Font:")
         the_col.prop(self, "font_name")
+        the_col.prop(self, "delete_text")
     #end draw
 
     def action_common(self, context, redoing) :
@@ -202,6 +209,11 @@ class HersheyText(bpy.types.Operator) :
             curve_obj.matrix_local = curve_obj.matrix_local
             bpy.ops.object.select_all(action = "DESELECT")
             bpy.data.objects[curve_name].select = True
+            context.scene.objects.active = curve_obj
+            if self.delete_text :
+                context.scene.objects.unlink(text_object)
+                bpy.data.objects.remove(text_object)
+            #end if
             # all done
             status = {"FINISHED"}
         except Failure as why :
