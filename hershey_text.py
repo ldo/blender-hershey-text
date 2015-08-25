@@ -138,48 +138,53 @@ class HersheyText(bpy.types.Operator) :
                         glyph_nr = ord(ch)
                     #end if
                     if glyph_nr != None :
-                        the_glyph = the_font.glyphs[glyph_nr]
+                        the_glyph = the_font.glyphs.get(glyph_nr)
+                    else :
+                        the_glyph = None
+                    #end if
+                    # note each new curve Spline already seems to have one point to begin with
+                    if the_glyph != None :
+                        glyph_width = the_glyph.max_x - the_glyph.min_x
                         for pathseg in the_glyph.path :
                             curve_spline = curve_data.splines.new("POLY")
                             for i, point in enumerate(pathseg) :
-                                curve_spline.points.add()
+                                if i != 0 :
+                                    curve_spline.points.add()
+                                #end if
                                 curve_spline.points[i].co = \
                                     (
-                                        tuple
-                                            (
-                                                scaling
-                                            *
-                                                mathutils.Vector((point.x, point.y - the_font.baseline_y, 0))
-                                            )
-                                    +
-                                        (0,)
-                                    )
+                                        mathutils.Matrix.Translation(pos)
+                                    *
+                                        scaling
+                                    *
+                                        mathutils.Vector((point.x, point.y - the_font.baseline_y, 0))
+                                    ).resized(4)
                             #end for
                         #end for
                     else :
+                        glyph_width = the_font.max.x - the_font.min.x
                         curve_spline = curve_data.splines.new("POLY")
-                        curve_spline.points.add(4)
+                        curve_spline.points.add(3)
                         for i, corner_x, corner_y in \
                             (
-                                (0, the_font.min_x, the_font.min_y),
-                                (1, the_font.max_x, the_font.min_y),
-                                (2, the_font.max_x, the_font.max_y),
-                                (3, the_font.min_x, the_font.max_y),
+                                (0, the_font.min.x, the_font.min.y),
+                                (1, the_font.max.x, the_font.min.y),
+                                (2, the_font.max.x, the_font.max.y),
+                                (3, the_font.min.x, the_font.max.y),
                             ) \
                         :
                             curve_spline.points[i].co = \
                                 (
-                                    tuple
-                                        (
-                                            scaling
-                                        *
-                                            mathutils.Vector((corner_x, corner_yy - the_font.baseline_y, 0))
-                                        )
-                                    +
-                                        (0,)
-                                )
+                                    mathutils.Matrix.Translation(pos)
+                                *
+                                    scaling
+                                *
+                                    mathutils.Vector((corner_x, corner_y - the_font.baseline_y, 0))
+                                ).resized(4)
                         #end for
+                        curve_spline.use_cyclic_u = True
                     #end if
+                    pos += mathutils.Vector((glyph_width * the_font.scale, 0, 0))
                 #end for
             #end if
             curve_obj = bpy.data.objects.new(curve_name, curve_data)
