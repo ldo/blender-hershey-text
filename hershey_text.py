@@ -123,11 +123,21 @@ class HersheyText(bpy.types.Operator) :
             curve_name = text_object.name + " hersh"
             curve_data = bpy.data.curves.new(curve_name, "CURVE")
             if the_font != None :
-                scaling = mathutils.Matrix.Scale \
-                  (
-                    the_font.scale, # factor
-                    4 # size
-                  )
+                scaling = \
+                    (
+                        mathutils.Matrix.Scale
+                          (
+                            -1, # factor
+                            4, # size
+                            mathutils.Vector((0, 1, 0)), # axis
+                          ) # flip Y-axis
+                    *
+                        mathutils.Matrix.Scale
+                          (
+                            the_font.scale, # factor
+                            4 # size
+                          )
+                    )
                 text_data = text_object.data
                 # TODO: text boxes, character formats
                 pos = mathutils.Vector((0, 0, 0))
