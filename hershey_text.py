@@ -49,14 +49,11 @@ class Failure(Exception) :
 
 def list_hershey_fonts() :
     result = [(" ", "(pick a font)", "")]
-    for item in os.listdir(hershey_font.default_path) :
-        if item.endswith(hershey_font.default_ext) :
-            item = item[: - len(hershey_font.default_ext)]
-            result.append \
-              (
-                (item, item, "")
-              )
-        #end if
+    for item in hershey_font.each_name() :
+        result.append \
+          (
+            (item, item, "")
+          )
     #end for
     return \
         result
