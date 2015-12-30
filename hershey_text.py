@@ -203,7 +203,7 @@ class HersheyText(bpy.types.Operator) :
             #end if
             curve_obj = bpy.data.objects.new(curve_name, curve_data)
             context.scene.objects.link(curve_obj)
-            curve_obj.matrix_local = curve_obj.matrix_local
+            curve_obj.matrix_local = text_object.matrix_local
             bpy.ops.object.select_all(action = "DESELECT")
             bpy.data.objects[curve_name].select = True
             context.scene.objects.active = curve_obj
