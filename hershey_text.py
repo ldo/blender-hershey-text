@@ -167,6 +167,19 @@ class HersheyText(bpy.types.Operator) :
                                 #end if
                                 curve_spline.points[i].co = \
                                     (
+                                        mathutils.Matrix.Scale
+                                          (
+                                            text_data.size, # factor
+                                            4, # size
+                                          )
+                                    *
+                                        mathutils.Matrix.Shear
+                                          (
+                                            "XZ" , # plane
+                                            4, # size
+                                            [text_data.shear, 0], # factor
+                                          )
+                                    *
                                         mathutils.Matrix.Translation(pos)
                                     *
                                         scaling
