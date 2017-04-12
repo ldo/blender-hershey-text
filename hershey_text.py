@@ -71,6 +71,19 @@ class HersheyText(bpy.types.Operator) :
         description = "name of Hershey font to use",
         items = list_hershey_fonts(),
       )
+    curve_type = bpy.props.EnumProperty \
+      (
+        name = "Curve Type",
+        description = "type of curves to create",
+        items =
+            ( # only "POLY" seems to work--"BEZIER" returns error, others produce empty curve
+                ("POLY", "Poly", ""),
+                ("BEZIER", "Bézier", ""),
+                ("BSPLINE", "B-Spline", ""),
+                ("CARDINAL", "Cardinal", ""),
+                ("NURBS", "NURBS", ""),
+            ),
+      )
     delete_text = bpy.props.BoolProperty \
       (
         name = "Delete Original Text",
@@ -97,6 +110,7 @@ class HersheyText(bpy.types.Operator) :
         the_col = self.layout.column(align = True)
         the_col.label("Hershey Font:")
         the_col.prop(self, "font_name")
+        the_col.prop(self, "curve_type")
         the_col.prop(self, "delete_text")
     #end draw
 
@@ -160,7 +174,7 @@ class HersheyText(bpy.types.Operator) :
                     if the_glyph != None :
                         glyph_width = the_glyph.max_x - the_glyph.min_x
                         for pathseg in the_glyph.path :
-                            curve_spline = curve_data.splines.new("POLY")
+                            curve_spline = curve_data.splines.new(self.curve_type)
                             for i, point in enumerate(pathseg) :
                                 if i != 0 :
                                     curve_spline.points.add()
