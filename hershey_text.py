@@ -56,7 +56,7 @@ def list_hershey_fonts() :
           )
     #end for
     return \
-        result
+        sorted(result, key = lambda i : i[0])
 #end list_hershey_fonts
 
 class HersheyText(bpy.types.Operator) :
