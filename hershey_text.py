@@ -76,13 +76,15 @@ class HersheyText(bpy.types.Operator) :
         name = "Curve Type",
         description = "type of curves to create",
         items =
-            ( # only "POLY" seems to work--"BEZIER" returns error, others produce empty curve
+            (
                 ("POLY", "Poly", ""),
                 ("BEZIER", "Bézier", ""),
-                ("BSPLINE", "B-Spline", ""),
-                ("CARDINAL", "Cardinal", ""),
-                ("NURBS", "NURBS", ""),
+                # others seem to produce empty curves, disable for now
+                #("BSPLINE", "B-Spline", ""),
+                #("CARDINAL", "Cardinal", ""),
+                #("NURBS", "NURBS", ""),
             ),
+        default = "BEZIER",
       )
     delete_text = bpy.props.BoolProperty \
       (
@@ -175,11 +177,13 @@ class HersheyText(bpy.types.Operator) :
                         glyph_width = the_glyph.max_x - the_glyph.min_x
                         for pathseg in the_glyph.path :
                             curve_spline = curve_data.splines.new(self.curve_type)
+                            is_bezier = self.curve_type == "BEZIER"
+                            points = (curve_spline.points, curve_spline.bezier_points)[is_bezier]
                             for i, point in enumerate(pathseg) :
                                 if i != 0 :
-                                    curve_spline.points.add()
+                                    points.add()
                                 #end if
-                                curve_spline.points[i].co = \
+                                points[i].co = \
                                     (
                                         mathutils.Matrix.Scale
                                           (
@@ -199,8 +203,15 @@ class HersheyText(bpy.types.Operator) :
                                         scaling
                                     *
                                         mathutils.Vector((point.x, point.y - the_font.baseline_y, 0))
-                                    ).resized(4)
+                                    ).resized((4, 3)[is_bezier])
                             #end for
+                            if is_bezier :
+                                for i in range(len(pathseg)) :
+                                    # need to do this after points have been added
+                                    points[i].handle_left_type = "AUTO"
+                                    points[i].handle_right_type = "AUTO"
+                                #end for
+                            #end if
                         #end for
                     else :
                         glyph_width = the_font.max.x - the_font.min.x
