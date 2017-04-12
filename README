@@ -1,0 +1,9 @@
+hershey_text is a Blender addon that lets you render text objects as
+curves using Hershey fonts <http://www.whence.com/hershey-fonts/>.
+Besides the Hershey fonts, you also need to have my HersheyPy module
+installed, which can be obtained from GitLab
+<https://gitlab.com/ldo/hersheypy> or GitHub
+<https://github.com/ldo/hersheypy>.
+
+Lawrence D'Oliveiro <ldo@geek-central.gen.nz>
+2017 April 12
