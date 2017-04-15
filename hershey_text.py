@@ -18,8 +18,8 @@ bl_info = \
     {
         "name" : "Hershey Text",
         "author" : "Lawrence D'Oliveiro <ldo@geek-central.gen.nz>",
-        "version" : (0, 1, 0),
-        "blender" : (2, 7, 5),
+        "version" : (0, 5, 0),
+        "blender" : (2, 7, 8),
         "location" : "View 3D > Object Mode > Tool Shelf",
         "description" :
             "Uses a Hershey font to turn a text object into a collection of curves.",
@@ -76,6 +76,13 @@ class HersheyText(bpy.types.Operator) :
             ),
         default = "BEZIER",
       )
+    sharp_angle = bpy.props.FloatProperty \
+      (
+        name = "Sharp Angle",
+        description = "Bézier curve angles below this become corners",
+        subtype = "ANGLE",
+        default = math.pi / 2,
+      )
     delete_text = bpy.props.BoolProperty \
       (
         name = "Delete Original Text",
@@ -103,6 +110,7 @@ class HersheyText(bpy.types.Operator) :
         the_col.label("Hershey Font:")
         the_col.prop(self, "font_name")
         the_col.prop(self, "curve_type")
+        the_col.prop(self, "sharp_angle")
         the_col.prop(self, "delete_text")
     #end draw
 
@@ -196,10 +204,27 @@ class HersheyText(bpy.types.Operator) :
                                     ).resized((4, 3)[is_bezier])
                             #end for
                             if is_bezier :
+                                sharp_angle = self.sharp_angle
                                 for i in range(len(pathseg)) :
-                                    # need to do this after points have been added
-                                    points[i].handle_left_type = "AUTO"
-                                    points[i].handle_right_type = "AUTO"
+                                    angle = \
+                                        (
+                                            math.pi
+                                        -
+                                                (points[(i + 1) % len(pathseg)].co - points[i].co)
+                                            .angle
+                                                (points[i].co - points[(i - 1) % len(pathseg)].co)
+                                        )
+                                    if angle < sharp_angle :
+                                        # make it a corner
+                                        points[i].handle_left_type = "FREE"
+                                        points[i].handle_right_type = "FREE"
+                                        points[i].handle_left = points[i].co
+                                        points[i].handle_right = points[i].co
+                                    else :
+                                        # make it curve
+                                        points[i].handle_left_type = "AUTO"
+                                        points[i].handle_right_type = "AUTO"
+                                    #end if
                                 #end for
                             #end if
                         #end for
