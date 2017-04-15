@@ -206,14 +206,18 @@ class HersheyText(bpy.types.Operator) :
                             if is_bezier :
                                 sharp_angle = self.sharp_angle
                                 for i in range(len(pathseg)) :
-                                    angle = \
-                                        (
-                                            math.pi
-                                        -
+                                    try :
+                                        angle = \
+                                            (
                                                 (points[(i + 1) % len(pathseg)].co - points[i].co)
                                             .angle
                                                 (points[i].co - points[(i - 1) % len(pathseg)].co)
-                                        )
+                                            )
+                                    except ValueError :
+                                        # assume zero-length vector somewhere
+                                        angle = 0
+                                    #end if
+                                    angle = math.pi - angle
                                     if angle < sharp_angle :
                                         # make it a corner
                                         points[i].handle_left_type = "FREE"
